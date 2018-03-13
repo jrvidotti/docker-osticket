@@ -1,5 +1,5 @@
 FROM php:7.0-fpm-alpine
-MAINTAINER Martin Campbell <martin@campbellsoftware.co.uk>
+MAINTAINER Junior Vidotti <jrvidotti@gmail.com>
 
 # setup workdir
 RUN mkdir /data
@@ -55,6 +55,14 @@ RUN wget -nv -O upload/include/i18n/fr.phar http://osticket.com/sites/default/fi
 # Download LDAP plugin
 RUN wget -nv -O upload/include/plugins/auth-ldap.phar http://osticket.com/sites/default/files/download/plugin/auth-ldap.phar
 
+RUN mkdir /data/share && \
+    mkdir /data/share/i18n && \
+    mv /data/upload/include/plugins /data/share/plugins && \
+    mv /var/log/nginx /data/share/nginx_log && \
+    ln -s /data/share/i18n /data/upload/include/i18n && \
+    ln -s /data/share/plugins /data/upload/include/plugins && \
+    ln -s /data/share/nginx_log /var/log/nginx 
+		
 # Configure nginx, PHP, msmtp and supervisor
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY php-osticket.ini $PHP_INI_DIR/conf.d/
@@ -66,6 +74,6 @@ COPY php.ini $PHP_INI_DIR/php.ini
 
 COPY bin/ /data/bin
 
-VOLUME ["/data/upload/include/plugins","/data/upload/include/i18n","/var/log/nginx"]
+VOLUME ["/data/share"]
 EXPOSE 80
 CMD ["/data/bin/start.sh"]
